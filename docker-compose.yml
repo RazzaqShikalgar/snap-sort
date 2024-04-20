@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+ app:
+  build: .
+  volumes:
+   - .:/app
+  ports:
+   - 80:8000
+  image: app:django
+  container_name: snap_sort
+  command: python3 backend/manage.py runserver 0.0.0.0:80
