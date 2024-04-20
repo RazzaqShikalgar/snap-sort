@@ -1,0 +1,31 @@
+FROM python:3.10.11
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --upgrade pip
+
+# Clone the dlib repository
+RUN git clone https://github.com/davisking/dlib.git /tmp/dlib
+
+# Build dlib
+WORKDIR /tmp/dlib
+RUN python setup.py install
+
+# Clean up
+RUN rm -rf /tmp/dlib
+
+RUN pip3 install -U pip wheel cmake
+
+
+COPY ./requirements.
+RUN pip install -r requirements.txt
+COPY ./backend /app
+
+WORKDIR /app
+
+COPY ./setup.sh /
+ENTRYPOINT ["sh","/setup.sh"]

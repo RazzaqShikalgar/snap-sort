@@ -114,6 +114,7 @@ def process(request):
         }
         return render(request, "404.html", context)
     imagePaths = [("static/images/" + str(photo.image)) for photo in photos]
+    print(imagePaths)
     data = []
 
     for (i, imagePath) in enumerate(imagePaths):
