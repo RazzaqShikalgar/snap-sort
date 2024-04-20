@@ -13,6 +13,12 @@ import cv2
 from sklearn.cluster import DBSCAN
 import numpy as np
 import re
+import time
+from home import utils
+import mediapipe as mp
+
+mp_face_detection = mp.solutions.face_detection
+
 
 # Required for downloading
 import os
@@ -218,7 +224,145 @@ def process(request):
 
     context = {"persons": result, "faces": numUniqueFaces}
     return render(request, "process.html", context)
+# def live_face_recognition(request):
+#     cap = cv2.VideoCapture(0)
 
+#     with mp_face_detection.FaceDetection(
+#         model_selection=0, min_detection_confidence=0.5
+#     ) as face_detector:
+#         frame_counter = 0
+#         fonts = cv2.FONT_HERSHEY_PLAIN
+#         start_time = time.time()
+
+#         while True:
+#             frame_counter += 1
+#             ret, frame = cap.read()
+
+#             if ret is False:
+#                 break
+
+#             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+#             results = face_detector.process(rgb_frame)
+#             frame_height, frame_width, c = frame.shape
+
+#             if results.detections:
+#                 for face in results.detections:
+#                     face_react = np.multiply(
+#                         [
+#                             face.location_data.relative_bounding_box.xmin,
+#                             face.location_data.relative_bounding_box.ymin,
+#                             face.location_data.relative_bounding_box.width,
+#                             face.location_data.relative_bounding_box.height,
+#                         ],
+#                         [frame_width, frame_height, frame_width, frame_height],
+#                     ).astype(int)
+#                     print(face_react)
+#                     # Draw rectangle around the detected face
+#                     utils.rect_corners(frame, face_react, utils.MAGENTA, th=3)
+
+#                     # Display the score of the detected face
+#                     utils.text_with_background(
+#                         frame,
+#                         f"score: {(face.score[0]*100):.2f}",
+#                         face_react[:2],
+#                         fonts,
+#                         color=utils.MAGENTA,
+#                         scaling=0.7,
+#                     )
+
+#             fps = frame_counter / (time.time() - start_time)
+#             utils.text_with_background(frame, f"FPS: {fps:.2f}", (30, 30), fonts)
+
+#             # Display the frame
+#             cv2.imshow("frame", frame)
+
+#             # Check if the user pressed 'q' to exit
+#             key = cv2.waitKey(1)
+#             if key == ord("q"):
+#                 break
+
+#     # Release the video capture object and destroy all windows
+#     cap.release()
+#     cv2.destroyAllWindows()
+#     return HttpResponse()
+
+#     # return redirect("/") 
+
+def live_face_recognition(request):
+    cap = cv2.VideoCapture(0)
+
+    with mp_face_detection.FaceDetection(
+        model_selection=0, min_detection_confidence=0.5
+    ) as face_detector:
+        frame_counter = 0
+        fonts = cv2.FONT_HERSHEY_PLAIN
+        start_time = time.time()
+
+        while True:
+            frame_counter += 1
+            ret, frame = cap.read()
+
+            if ret is False:
+                break
+
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            results = face_detector.process(rgb_frame)
+            frame_height, frame_width, c = frame.shape
+
+            if results.detections:
+                for face in results.detections:
+                    face_react = np.multiply(
+                        [
+                            face.location_data.relative_bounding_box.xmin,
+                            face.location_data.relative_bounding_box.ymin,
+                            face.location_data.relative_bounding_box.width,
+                            face.location_data.relative_bounding_box.height,
+                        ],
+                        [frame_width, frame_height, frame_width, frame_height],
+                    ).astype(int)
+                    # Draw rectangle around the detected face
+                    utils.rect_corners(frame, face_react, utils.MAGENTA, th=3)
+
+                    # Get facial encodings
+                    face_image = frame[
+                        face_react[1] : face_react[1] + face_react[3],
+                        face_react[0] : face_react[0] + face_react[2]
+                    ]
+                    rgb_face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
+                    face_encodings = face_recognition.face_encodings(rgb_face_image)
+
+                    # Save face coordinates to the database
+                    if face_encodings:
+                        face_coordinates = FaceCoordinates.objects.create(
+                            xmin=face_react[0],
+                            ymin=face_react[1],
+                            width=face_react[2],
+                            height=face_react[3],
+                        )
+                        face_coordinates.save()
+
+                        # Print face coordinates in the terminal
+                        print("Face detected at:", face_react)
+                    else:
+                        print("No face detected")
+
+            fps = frame_counter / (time.time() - start_time)
+            utils.text_with_background(frame, f"FPS: {fps:.2f}", (30, 30), fonts)
+
+            # Display the frame
+            cv2.imshow("frame", frame)
+
+            # Check if the user pressed 'q' to exit
+            key = cv2.waitKey(1)
+            if key == ord("q"):
+                break
+
+    # Release the video capture object and destroy all windows
+    cap.release()
+    cv2.destroyAllWindows()
+    return HttpResponse()
 
 def albumGallery(request):
     user = request.user
@@ -268,7 +412,6 @@ def albumGallery(request):
 
     context = {"persons": result, "faces": numUniqueFaces}
     return render(request, "process.html", context)
-
 
 def viewAlbum(request, pk):
     person = Person.objects.get(id=pk)

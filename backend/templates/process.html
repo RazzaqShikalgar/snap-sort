@@ -33,13 +33,13 @@
                 <p>Your RoomCode:<br> <strong>{{request.user}}</strong></p>
                 <p>Number of Unique faces: <strong>{{faces}}</strong></p>
                 {% endif %}
-                
+
                 <div class="card">
-                    
+
                     <ul class="list-group list-group-flush">
 
                         <a href="{% url 'index' %}" class="btn btn-dark btn-block btn-sm m-1">Go Back</a>
-                        
+
                     </ul>
                 </div>
 
@@ -47,19 +47,27 @@
             <div class="col-md-9">
                 <div class="row">
 
-                    {% for person in persons %}
-                    <div class="col-md-4">
-                        <div class="card my-2">
-                            <img class="image-thumbail" src="{{person.thumbnail.url}}" alt="Card image cap">
-                            
-                            <!-- <a href="{% url 'album' person.id %}" class="btn btn-outline-dark yellow btn-sm m-1">View</a> -->
-                        </div>
-                    </div>
-                    {% empty %}
-                    <h3>No photos...</h3>
-                    {% endfor %}
-
-
+                    {% if persons %}
+                        {% for person in persons %}
+                            <div class="col-md-4">
+                                <div class="card my-2">
+                                    <img class="image-thumbail" src="{{person.thumbnail.url}}" alt="Card image cap">
+                                    
+                                    <a href="{% url 'album' person.id %}" class="btn btn-outline-dark yellow btn-sm m-1">View</a>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <h3>No photos...</h3>
+                        {% endfor %}
+                    {% else %}
+                        <h3>Folder not found. Please try again.</h3>
+                        <p>Here are all available folders:</p>
+                        <ul>
+                            {% for person in all_persons %}
+                                <li>{{ person.folder }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
 
                 </div>
             </div>

@@ -24,3 +24,15 @@ class PersonGallery(models.Model):
 
     def __str__(self):
         return self.person.user
+
+from django.db import models
+
+class FaceCoordinates(models.Model):
+    x = models.IntegerField()
+    y = models.IntegerField()
+    width = models.IntegerField()
+    height = models.IntegerField()
+    # You can add more fields as needed
+
+    def __str__(self):
+        return f"Face Coordinates: ({self.x}, {self.y}), Width: {self.width}, Height: {self.height}"

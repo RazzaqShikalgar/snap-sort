@@ -15,4 +15,6 @@ urlpatterns = [
     path("download/<str:pk>/", views.downloadZIP, name="download"),
     path("albumGallery", views.albumGallery, name="albumGallery"),
     path("process", views.process, name="process"),
+    path("live_face_recognition", views.live_face_recognition, name="live_face_recognition"),  # Add this line
+
 ]
