@@ -15,7 +15,7 @@ services:
   ports:
     -"80:80"
   depends_on:
-    -django_gunicorn
+    - django_gunicorn
 
 volumes:
   static:
