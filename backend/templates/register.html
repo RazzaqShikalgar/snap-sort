@@ -34,6 +34,8 @@
   <body class="text-center">
    
     <form class="form-signin" method="post" action="/register2">
+      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
     {% csrf_token %}
       <img src="https://res.cloudinary.com/dsswjmlin/image/upload/v1709657796/Snap_Sort_qreupd.png" alt="" width="256" height="256">
       
